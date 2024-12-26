@@ -14,7 +14,7 @@ return [
     */
 
     'defaults' => [
-        'guard' => env('AUTH_GUARD', 'api'),
+        'guard' => env('AUTH_GUARD', 'web'),
         'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
     ],
 
@@ -40,6 +40,14 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'daneshamooz'=>[
+            'driver'=>'jwt',
+            'provider'=>'daneshamooz'
+        ],
+        'moshaver'=>[
+            'driver'=>'jwt',
+            'provider'=>'moshaver'
+        ],
         'api'=>[
             'driver'=>'jwt',
             'provider'=>'users'
@@ -64,15 +72,19 @@ return [
     */
 
     'providers' => [
-        'users' => [
+        'daneshamooz' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\Daneshamooz::class),
+            'model' => App\Models\Daneshamooz::class,
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        'moshaver' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Moshaver::class,
+        ],
+        'users'=>[
+            'driver'=>'eloquent',
+            'model'=>App\Models\User::class
+        ]
     ],
 
     /*
