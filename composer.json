@@ -10,6 +10,7 @@
         "laravel/octane": "^2.6",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
+        "morilog/jalali": "3.*",
         "tymon/jwt-auth": "^2.1"
     },
     "require-dev": {

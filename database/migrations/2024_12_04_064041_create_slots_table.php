@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('moshaver_id')->constrained('moshaver')->onDelete('cascade');
             $table->date('date');
             $table->time('time');
-            $table->string('status')->default('available'); // وضعیت پیش‌فرض
+            $table->string('status')->default('available'); 
             $table->timestamps();
         });
     }

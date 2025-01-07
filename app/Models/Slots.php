@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Slots extends Model
 {
-    protected $fillable = ['moshaver_id', 'date', 'time', 'status'];
+    protected $fillable = ['moshaver_id', 'date', 'start_time','end_time', 'status'];
 
     public function moshaver()
     {

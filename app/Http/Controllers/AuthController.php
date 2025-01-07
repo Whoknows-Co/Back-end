@@ -19,11 +19,30 @@ class AuthController extends Controller
         }
         try{
             $request->validate([
-                'first_name'=>'required|string|max:50',
-                'last_name'=>'required|string|max:50',
-                'phone_number'=>'required|digits:11|unique:'. $guard,
-                'email'=>'required|string|email|max:255|unique:'. $guard,
-                'password'=>'required|string|min:8|confirmed'
+                'first_name' => 'required|string|max:50',
+                'last_name' => 'required|string|max:50',
+                'phone_number' => 'required|digits:11|unique:' . $guard,
+                'email' => 'required|string|email|max:255|unique:' . $guard,
+                'password' => [
+                    'required',
+                    'string',
+                    'min:8',
+                    'confirmed',
+                    function ($attribute, $value, $fail) {
+                        if (!preg_match('/[A-Z]/', $value)) {
+                            $fail('The password must contain at least one uppercase letter.');
+                        }
+                        if (!preg_match('/[a-z]/', $value)) {
+                            $fail('The password must contain at least one lowercase letter.');
+                        }
+                        if (!preg_match('/[0-9]/', $value)) {
+                            $fail('The password must contain at least one number.');
+                        }
+                    },
+                ],
+            ], [
+                'password.min' => 'The password must be at least 8 characters long.',
+                'password.confirmed' => 'The password confirmation does not match.',
             ]);
             if(!str_starts_with($request->phone_number,"09"))
                 return response()->json(["The phone format is wrong"],422);
@@ -54,7 +73,12 @@ class AuthController extends Controller
                     return response()->json(["error"=>'The password field confirmation does not match'],422);
                 elseif(str_starts_with($error_type,"The email field must be a valid email address"))
                     return response()->json(["error"=>"The email field must be a valid email address"],422);
-                return response()->json(['error'=>"Error"],500);
+                elseif(str_starts_with($error_type,"The password must contain at least one uppercase letter"))
+                    return response()->json(["error"=>"The password must contain at least one uppercase letter."],422);
+                elseif(str_starts_with($error_type,"The password must contain at least one lowercase letter"))
+                    return response()->json(["error"=>"The password must contain at least one lowercase letter."],422);
+                
+                return response()->json(['error'=>$e->getMessage()],500);
             }
     }
     public function login(Request $request){
@@ -98,6 +122,49 @@ class AuthController extends Controller
             'token_type' => 'Bearer',
             'expires_in' => JWTAuth::factory()->getTTL() * 60
         ]);
+    }
+    public function updateProfile(Request $request){
+        try{
+            $user=Auth::user();
+            if(!$user){
+                return response()->json(['error'=>'Unauthorized'],401);
+            
+            }
+            $guard=$user instanceof Daneshamooz ? 'daneshamooz':'moshaver';
+            $request->validate([
+                'first_name' => 'nullable|string|max:50',
+                'last_name' => 'nullable|string|max:50',
+                'phone_number' => [
+                    'nullable',
+                    'digits:11',
+                    'unique:' . $guard . ',phone_number,' . $user->id,
+                    function ($attribute, $value, $fail) {
+                        if ($value && !str_starts_with($value, '09')) {
+                            $fail('Invalid phone format');
+                        }
+                    },
+                ],
+                'email' => 'nullable|string|email|max:255|unique:' . $guard . ',email,' . $user->id,
+                'password' => 'nullable|string|min:8|confirmed',
+            ], [
+                'phone_number.digits' => 'The phone number must be exactly 11 digits.',
+                'phone_number.unique' => 'The phone number is already in use.',
+                'email.unique' => 'The email is already in use.',
+                'password.min' => 'The password must be at least 8 characters long.',
+                'password.confirmed' => 'The password confirmation does not match.',
+            ]);
+
+            $fieldsToUpdate=$request->only(['first_name','last_name','phone_number','email']);
+            if($request->filled('password')){
+                $fieldsToUpdate['password']=Hash::make($request->password);
+            }
+            $user->update($fieldsToUpdate);
+            return response()->json(['message'=>'Profile updated successfully!'],200);
+
+        }
+        catch(\Exception $e){
+            return response()->json(['error'=>$e->getMessage()],500);
+        }
     }
 
 }

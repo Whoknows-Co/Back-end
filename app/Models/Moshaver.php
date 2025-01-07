@@ -37,4 +37,8 @@ class Moshaver extends Authenticatable implements JWTSubject
     public function availableTimes(){
         return $this->hasMany(AvailableTime::class);
     }
+    public function moshaverProfile(){
+        return $this->hasOne(MoshaverProfile::class);
+    }
+
 }
