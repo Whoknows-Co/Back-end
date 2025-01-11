@@ -31,7 +31,7 @@ class MoshaverProfile extends Model
 
         static::saving(function ($profile) {
             $requiredFields = [
-                'specialty', 'city', 'address', 'about', 'services', 'social_media','display_phone'
+                'specialty', 'city', 'address', 'about','display_phone'
             ];
             $data = $profile->exists ? $profile->getOriginal() : [];
             $data = array_merge($data, $profile->getAttributes());
